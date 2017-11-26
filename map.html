@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 90%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="success" class="alert alert-success alert-dismissable" style="display: none;">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+      <strong id="alert">Success!</strong>
+    </div>
+    <select id="keyword">
+        <option value=""></option>>
+        <option value="today">Today</option>
+        <option value="birthday">Birthday</option>
+        <option value="sport">Sport</option>
+        <option value="hello">Hello</option>
+        <option value="nba">NBA</option>
+        <option value="coffee">Coffee</option>
+        <option value="nba">NBA</option>
+        <option value="song">Song</option>
+        <option value="it">It</option>
+        <option value="a">a</option>
+    </select>
+    <button id="search" type="button">Search</button>
+    <button id="stop" type="button">Stop</button>
+    <button id="stream" type="button">Stream</button>
+    <div id="counter"></div>
+    <div id="div1"></div>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 34.397, lng: 150.644},
+          zoom: 2
+        });
+        google.maps.event.addListener(map, 'click', function(event) {
+            var cordinates = String(event.latLng).replace('(','').replace(')','').split(', ');
+            alert(cordinates[0] + cordinates[1]);
+            xhr = $.ajax({url: "search.php?lat=" + cordinates[0] + "&lon=" + cordinates[1], success: function(result){
+              alert("Showing nearby tweets from ES");
+              var tweets = result.split('&&');
+              tweets.forEach(function(entry) {
+                var contents = entry.split('$$');
+                console.log(contents[0]);
+                var myLatLng = new google.maps.LatLng(Number(contents[1]), Number(contents[2]));
+                var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+                var marker = new google.maps.Marker({
+                    position: myLatLng,
+                    animation: google.maps.Animation.DROP,
+                    title: contents[0],
+                    icon: image
+                });
+                marker.addListener('click', function() {
+                  new google.maps.InfoWindow({content: contents[0]}).open(map, marker);
+                });
+                // To add the marker to the map, call setMap();
+                marker.setMap(map);
+
+                });
+
+            }});
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxcSct_LGtpjAoXRmb56TcEL7SjrrMYeM&callback=initMap"
+    async defer></script>
+    <script type="text/javascript">
+      var t;
+      var xhr;
+      var count = 0;
+      function stream() {
+        $.ajax({url: "https://47s3ejwtt1.execute-api.us-east-1.amazonaws.com/Beta/twitter-stream"});
+        $.ajax({url: "http://ec2-34-234-167-23.compute-1.amazonaws.com:8080/?method=reset", success: function() {
+          alert("Start Streaming");
+        }});
+        t = setInterval(function(){
+        $.ajax({url: "http://ec2-34-234-167-23.compute-1.amazonaws.com:8080/?method=get", success: function(result){
+            if (result != '0') {
+              $("#success").show();
+              $("#alert").html("Successfully processe " + result + " messages");
+            }
+          }});},100);
+      }
+      function plot() {
+        var keyword = $("#keyword").val();
+        $.ajax({type: "POST",
+        url: "https://47s3ejwtt1.execute-api.us-east-1.amazonaws.com/Beta/twitter-search",
+        data: '{"method":"search","keyword":"' + keyword +'"}',
+        success: function(result){
+             var json = JSON.parse(result);
+             alert(json.hits.hits.length);
+             for (var i = 0; i < json.hits.hits.length; i++){
+               label(json.hits.hits[i]._source.location, json.hits.hits[i]._source.text, json.hits.hits[i]._source.sentimentScore);
+             }
+
+          }});
+      };
+
+      function label(location, text, score) {
+        var myLatLng = new google.maps.LatLng(Number(location[0]), Number(location[1]));
+        if (Number(score) > 0) {
+          var marker = new google.maps.Marker({
+               position: myLatLng,
+               animation: google.maps.Animation.DROP,
+               icon: "https://s3.amazonaws.com/twiitermap/happy.jpeg"
+           });
+        } else if (Number(score) < 0){
+          var marker = new google.maps.Marker({
+               position: myLatLng,
+               animation: google.maps.Animation.DROP,
+               icon: "https://s3.amazonaws.com/twiitermap/sad.png"
+           });
+        } else {
+          var marker = new google.maps.Marker({
+               position: myLatLng,
+               animation: google.maps.Animation.DROP,
+               icon: "https://s3.amazonaws.com/twiitermap/netrual.jpeg"
+           });
+        }
+       var content = text + 'score:' + score;
+       console.log(content);
+       marker.addListener('click', function() {
+         new google.maps.InfoWindow({content: content}).open(map, marker);
+       });
+       // To add the marker to the map, call setMap();
+       marker.setMap(map);
+      };
+      $("#stream").click(function(){
+        stream();});
+      $("#search").click(function(){
+        plot();});
+      $("#stop").click(function(){
+        clearInterval(t);
+        xhr.abort();});
+
+    </script>
+  </body>
+</html>
