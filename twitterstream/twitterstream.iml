@@ -56,9 +56,5 @@
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp-urlconnection:3.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Maven: org.glassfish.jersey.bundles.repackaged:jersey-jsr166e:2.22.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.kafka:kafka-clients:1.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.lz4:lz4-java:1.4" level="project" />
-    <orderEntry type="library" name="Maven: org.xerial.snappy:snappy-java:1.1.4" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
   </component>
 </module>

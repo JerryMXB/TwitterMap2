@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class ElasticSearch {
-    private static final String ES_URL = "https://search-twittermap-qkhshjtekerke6c7rd244mua3i.us-east-1.es.amazonaws.com/tweet/tweetmap2";
+    private static final String ES_URL = "https://search-twittermap-qkhshjtekerke6c7rd244mua3i.us-east-1.es.amazonaws.com/tweet2/tweetmap";
 
     public static void indexToElasticSearch(String body) {
         postWithBody("", body);

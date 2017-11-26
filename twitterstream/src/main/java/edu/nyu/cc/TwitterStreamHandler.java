@@ -13,7 +13,7 @@ public class TwitterStreamHandler implements RequestHandler<Object, String> {
         Thread thread = new Thread(new TwitterStream());
         thread.start();
         try {
-            Thread.sleep(200000);
+            Thread.sleep(2000000);
         } catch (InterruptedException ioe) {
             System.out.println(ioe.getMessage());
         }

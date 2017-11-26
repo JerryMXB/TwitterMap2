@@ -28,14 +28,12 @@
     </div>
     <select id="keyword">
         <option value=""></option>>
-        <option value="today">Today</option>
-        <option value="birthday">Birthday</option>
-        <option value="sport">Sport</option>
-        <option value="hello">Hello</option>
-        <option value="nba">NBA</option>
-        <option value="coffee">Coffee</option>
-        <option value="nba">NBA</option>
-        <option value="song">Song</option>
+        <option value="Phoenix">Phoenix</option>
+        <option value="temperature">temperature</option>
+        <option value="Dyer">Dyer</option>
+        <option value="work">work</option>
+        <option value="SanAntonio">SanAntonio</option>
+        <option value="BuenosAires">BuenosAires</option>
         <option value="it">It</option>
         <option value="a">a</option>
     </select>
@@ -55,28 +53,16 @@
         google.maps.event.addListener(map, 'click', function(event) {
             var cordinates = String(event.latLng).replace('(','').replace(')','').split(', ');
             alert(cordinates[0] + cordinates[1]);
-            xhr = $.ajax({url: "search.php?lat=" + cordinates[0] + "&lon=" + cordinates[1], success: function(result){
+            xhr = $.ajax({url: "https://47s3ejwtt1.execute-api.us-east-1.amazonaws.com/Beta/twitter-search",
+              type : "POST",
+              data: '{"method":"location","lat":"' + cordinates[0] +'", "lon":"' + cordinates[1] + '"}',
+              success: function(result){
               alert("Showing nearby tweets from ES");
-              var tweets = result.split('&&');
-              tweets.forEach(function(entry) {
-                var contents = entry.split('$$');
-                console.log(contents[0]);
-                var myLatLng = new google.maps.LatLng(Number(contents[1]), Number(contents[2]));
-                var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-                var marker = new google.maps.Marker({
-                    position: myLatLng,
-                    animation: google.maps.Animation.DROP,
-                    title: contents[0],
-                    icon: image
-                });
-                marker.addListener('click', function() {
-                  new google.maps.InfoWindow({content: contents[0]}).open(map, marker);
-                });
-                // To add the marker to the map, call setMap();
-                marker.setMap(map);
-
-                });
-
+              var json = JSON.parse(result);
+              console.log(json.hits.hits.length);
+              for (var i = 0; i < json.hits.hits.length; i++){
+                label(json.hits.hits[i]._source.location, json.hits.hits[i]._source.text, json.hits.hits[i]._source.sentimentScore, true);
+              }
             }});
         });
       }
@@ -109,14 +95,20 @@
              var json = JSON.parse(result);
              alert(json.hits.hits.length);
              for (var i = 0; i < json.hits.hits.length; i++){
-               label(json.hits.hits[i]._source.location, json.hits.hits[i]._source.text, json.hits.hits[i]._source.sentimentScore);
+               label(json.hits.hits[i]._source.location, json.hits.hits[i]._source.text, json.hits.hits[i]._source.sentimentScore, false);
              }
 
           }});
       };
 
-      function label(location, text, score) {
+      function label(location, text, score, search) {
         var myLatLng = new google.maps.LatLng(Number(location[0]), Number(location[1]));
+        if (search == true) {
+          var marker = new google.maps.Marker({
+               position: myLatLng,
+               animation: google.maps.Animation.DROP
+           });
+        }
         if (Number(score) > 0) {
           var marker = new google.maps.Marker({
                position: myLatLng,

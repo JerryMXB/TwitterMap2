@@ -10,7 +10,7 @@ import java.net.URL;
  * Created by chaoqunhuang on 11/21/17.
  */
 public class ElasticSearch {
-    private static final String ES_URL = "https://search-twittermap-qkhshjtekerke6c7rd244mua3i.us-east-1.es.amazonaws.com/tweet/tweetmap2/";
+    private static final String ES_URL = "https://search-twittermap-qkhshjtekerke6c7rd244mua3i.us-east-1.es.amazonaws.com/tweet2/tweetmap/";
 
     public static String fetchAllTweets() {
         String json = "{\n" +
